@@ -1,7 +1,10 @@
 import hashlib
+import datetime
+import calendar
+import jwt
 
 from dao.user import UserDAO
-from constants import PWD_HASH_SALT, PWD_HASH_ITERATIONS
+from constants import PWD_HASH_SALT, PWD_HASH_ITERATIONS, SECRET, ALGO
 
 
 class UserService:
@@ -30,3 +33,32 @@ class UserService:
             PWD_HASH_SALT,
             PWD_HASH_ITERATIONS
         ).decode('utf-8', 'ignore')
+
+    def auth(self, login, password):
+        return self.dao.check_login_pasword(login, password)
+
+    def generate_jwt(self, login, password, role, secret=SECRET, algo=ALGO):
+
+        user_obj = {'login': login, 'password': password, 'role': role}
+
+        days2 = datetime.datetime.utcnow() + datetime.timedelta(days=2)  # задаем время жизни токена
+        user_obj['exp'] = calendar.timegm(days2.timetuple())  # кол-во секунд с января 1970 (дата истечения jwt)
+
+        access_token = jwt.encode(user_obj, secret, algo)
+
+        days130 = datetime.datetime.utcnow() + datetime.timedelta(days=130)  # задаем время жизни токена
+        user_obj['exp'] = calendar.timegm(days130.timetuple())  # кол-во секунд с января 1970 (дата истечения jwt)
+
+        refresh_token = jwt.encode(user_obj, secret, algorithm=algo)
+
+        return {'access_token': access_token, 'refresh_token': refresh_token}
+
+    def check_token(self, token, secret=SECRET, algo=ALGO):
+        try:
+            decoded_token = jwt.decode(token, secret, algorithms=[algo])
+            return True
+        except Exception as e:
+            return False
+
+    def check_login_password(self, login, password):
+        return self.dao.check_login_pasword(login, password)
