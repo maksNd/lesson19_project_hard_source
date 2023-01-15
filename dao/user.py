@@ -39,18 +39,3 @@ class UserDAO:
         if user.password != password:
             return False
         return True
-
-    # def check_user(self, login, password):
-    #     if self.get_by_login(login).password == password:
-    #         return True
-    #     return False
-
-# from setup_db import db
-# from flask import Flask
-# app = Flask(__name__)
-# SQLALCHEMY_TRACK_MODIFICATIONS = False
-# db.init_app(app)
-# test_user = UserDAO(db.session)
-#
-# with app.app_context():
-#     print(test_user.get_all())

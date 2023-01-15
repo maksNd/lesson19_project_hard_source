@@ -19,8 +19,11 @@ class UsersView(Resource):
 
     def post(self):
         data_for_user = request.json
-        user_service.create(data_for_user)
-        return '', 201
+        try:
+            user_service.create(data_for_user)
+            return '', 201
+        except Exception as e:
+            return '', 400
 
 
 @user_ns.route('/<int:uid>')
@@ -53,11 +56,8 @@ class UserAuth(Resource):
         login = data.get('username', None)
         password = data.get('password', None)
         role = data.get('role', None)
-        # refresh_token = data.get('refresh_token', None)
         if user_service.check_login_password(login, password) is False:
             abort(400)
-        # if user_service.check_token(refresh_token) is False:
-        #     abort(400)
         return user_service.generate_jwt(login, password, role), 200
 
     def put(self):
