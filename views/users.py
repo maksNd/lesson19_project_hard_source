@@ -1,5 +1,5 @@
 from flask_restx import Resource, Namespace
-from flask import request
+from flask import request, abort
 
 from dao.model.user import UserSchema
 from implemented import user_service
@@ -38,9 +38,21 @@ class UserView(Resource):
         user_service.delete(uid)
         return '', 204
 
+
 @user_ns.route('/auth')
 class UserAuth(Resource):
     def post(self):
         data = request.json
         login = data.get('username')
         password = data.get('password')
+        if user_service.check_user({'login': login, 'password': password}) is False:
+            abort(400)
+        else:
+            return user_service.generate_tokens(), 200
+
+    def put(self):
+        refresh_token = request.json
+        if user_service.check_refresh_token(refresh_token) is False:
+            abort(400)
+        else:
+            return user_service.generate_tokens(), 200
