@@ -56,16 +56,17 @@ class UserAuth(Resource):
         login = data.get('username', None)
         password = data.get('password', None)
         role = data.get('role', None)
-        if user_service.check_login_password(login, password) is False:
+        if user_service.auth(login, password) is False:
             abort(400)
         return user_service.generate_jwt(login, password, role), 200
 
     def put(self):
         data = request.json
         login = data.get('username')
+        role = data.get('role')
         password = data.get('password')
         refresh_token = data.get('refresh_token')
         if user_service.check_token(refresh_token) is False:
             abort(400)
         else:
-            return user_service.generate_jwt(login, password), 200
+            return user_service.generate_jwt(login, password, role), 200
